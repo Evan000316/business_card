@@ -1,0 +1,41 @@
+name: Deploy Digital Card to Pages
+
+# 1. 定義觸發事件：當 main 分支收到 push 時觸發
+on:
+  push:
+    branches:
+      - main
+
+# 2. 授權：GitHub Actions 需要讀取與寫入 Pages 的權限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 3. 定義工作內容
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest # 使用最新版 Ubuntu 虛擬機執行
+    
+    steps:
+      # 步驟 A: 複製（Checkout）你儲存庫裡的程式碼到虛擬機中
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 步驟 B: 設定 GitHub Pages 環境
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # 步驟 C: 將專案內的所有檔案（包含 index.html）打包
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # 代表打包根目錄的所有檔案
+
+      # 步驟 D: 正式部署到 GitHub Pages 伺服器
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
