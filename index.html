@@ -28,30 +28,58 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&display=swap');
         body { background-color: #0F172A; -webkit-font-smoothing: antialiased; }
-        .tab-active { background-color: #0F172A; color: #00E676; border-color: rgba(0, 230, 118, 0.3); }
+
+        /* ========================================================
+           ※ 按鈕樣式
+        ======================================================== */
+        .tab-btn {
+            padding-top: 0.375rem;
+            padding-bottom: 0.375rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: all 150ms ease-in-out;
+            cursor: pointer;
+        }
+
+        /* 🟢 點擊激活狀態 (true) */
+        .tab-btn[data-active="true"] {
+            color: #00E676;                         /* 螢光綠字 */
+            background-color: #0F172A;              /* 深色背景 */
+            border-color: rgba(16, 185, 129, 0.25); /* 綠色微光邊框 */
+        }
+
+        /* ⚪ 未點擊狀態 (false) */
+        .tab-btn[data-active="false"] {
+            color: #64748B;                         /* 灰字 */
+            background-color: transparent;
+        }
+
+        /* 💡 電腦端滑鼠移入未點擊按鈕時變白色 */
+        @media (hover: hover) {
+            .tab-btn[data-active="false"]:hover {
+                color: #F8FAFC;
+            }
+        }
     </style>
 </head>
 <body class="font-sans min-h-screen flex items-center justify-center p-4 sm:p-6">
 
 <div class="w-full max-w-md bg-brand-card rounded-2xl shadow-2xl border border-slate-700/50 p-6 sm:p-7 relative overflow-hidden">
 
-    <!-- 頂部炫彩線條 -->
     <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-sky-500 to-orange-400"></div>
 
-    <!-- 1. 基本識別 -->
     <div class="text-center mt-2 mb-4">
         <h1 class="text-2xl font-bold tracking-tight text-white">Evan Lin</h1>
         <p class="text-xs font-mono text-slate-400 mt-0.5">@ 乙太矩陣 (Aether Matrix)</p>
     </div>
 
-    <!-- 2. 職業分頁切換按鈕 -->
     <div class="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[10px] font-mono font-medium uppercase mb-5">
-        <button onclick="switchTab('swe')" id="tab-swe" class="tab-active py-1.5 rounded-lg text-center border border-transparent transition-all duration-150">SWE</button>
-        <button onclick="switchTab('game')" id="tab-game" class="py-1.5 rounded-lg text-center border border-transparent text-slate-500 hover:text-slate-300 transition-all duration-150">GAME</button>
-        <button onclick="switchTab('photo')" id="tab-photo" class="py-1.5 rounded-lg text-center border border-transparent text-slate-500 hover:text-slate-300 transition-all duration-150">PHOTO</button>
+        <button onclick="switchTab('swe')" id="tab-swe" data-active="true" class="tab-btn">SWE</button>
+        <button onclick="switchTab('game')" id="tab-game" data-active="false" class="tab-btn">GAME</button>
+        <button onclick="switchTab('photo')" id="tab-photo" data-active="false" class="tab-btn">PHOTO</button>
     </div>
 
-    <!-- ==================== 分頁：軟體工程 ==================== -->
     <div id="content-swe" class="tab-content space-y-5">
         <div class="grid grid-cols-3 gap-2 text-center font-mono">
             <div class="bg-slate-900/40 rounded-lg p-2 border border-slate-800/80"><div class="text-sm font-bold text-white">3+ Yrs</div><div class="text-[9px] text-slate-500 mt-0.5">Experience</div></div>
@@ -65,7 +93,6 @@
         </div>
     </div>
 
-    <!-- ==================== 分頁：遊戲設計 ==================== -->
     <div id="content-game" class="tab-content space-y-5 hidden">
         <div class="grid grid-cols-3 gap-2 text-center font-mono">
             <div class="bg-slate-900/40 rounded-lg p-2 border border-slate-800/80"><div class="text-sm font-bold text-white">System</div><div class="text-[9px] text-slate-500 mt-0.5">Design</div></div>
@@ -78,7 +105,6 @@
         </div>
     </div>
 
-    <!-- ==================== 分頁：商品攝影 ==================== -->
     <div id="content-photo" class="tab-content space-y-5 hidden">
         <div class="grid grid-cols-3 gap-2 text-center font-mono">
             <div class="bg-slate-900/40 rounded-lg p-2 border border-slate-800/80"><div class="text-sm font-bold text-white">Commercial</div><div class="text-[9px] text-slate-500 mt-0.5">Product</div></div>
@@ -93,10 +119,9 @@
 
     <hr class="border-slate-700/40 my-5">
 
-    <!-- 3. 行動聯絡 (已加上 Icon 並優化對齊) -->
     <div class="space-y-2">
         <a href="mailto:Evan@aether-matrix.com" class="block w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-center py-2.5 rounded-xl transition-colors duration-150 text-xs font-mono">
-            EMAIL: Evan@aether-matrix.com
+            📧 EMAIL: Evan@aether-matrix.com
         </a>
         <div class="grid grid-cols-2 gap-2.5">
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="block bg-slate-900 hover:bg-slate-800 text-slate-300 py-2.5 rounded-xl border border-slate-800 transition-colors duration-150 text-xs font-mono flex items-center justify-center gap-2">
@@ -116,19 +141,21 @@
 
 </div>
 
-<!-- 控制切換的 JS 機制 -->
 <script>
     function switchTab(role) {
+        // 1. 隱藏所有分頁內容
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('[id^="tab-"]').forEach(el => {
-            el.classList.remove('tab-active', 'text-brand-accent');
-            el.classList.add('text-slate-500');
+
+        // 2. 顯示點擊的分頁
+        document.getElementById('content-' + role).classList.remove('hidden');
+
+        // 3. 將所有按鈕的啟用狀態設為 false
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.setAttribute('data-active', 'false');
         });
 
-        document.getElementById('content-' + role).classList.remove('hidden');
-        const activeTab = document.getElementById('tab-' + role);
-        activeTab.classList.add('tab-active');
-        activeTab.classList.remove('text-slate-500');
+        // 4. 將當前點擊的按鈕啟用狀態設為 true
+        document.getElementById('tab-' + role).setAttribute('data-active', 'true');
     }
 </script>
 
