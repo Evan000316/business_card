@@ -4,96 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evan Lin | Digital Card</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        /* ========================================================
+           ※ Tailwind CSS 專案客製化配置
+        ======================================================== */
         tailwind.config = {
             theme: {
                 extend: {
+                    // 全域字體定義：sans 用於一般文字，mono 用於程式碼與數據
                     fontFamily: {
                         sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
                         mono: ['Fira Code', 'JetBrains Mono', 'monospace'],
                     },
+                    // 數位名片專屬主題配色（深藍調底色 + 霓虹綠點綴）
                     colors: {
                         brand: {
-                            bg: '#0F172A',
-                            card: '#1E293B',
-                            accent: '#00E676',
-                            textMuted: '#94A3B8'
+                            bg: '#0F172A',         /* 網頁大背景色 (Slate-900) */
+                            card: '#1E293B',       /* 名片卡片主體背景色 (Slate-800) */
+                            accent: '#00E676',     /* 翡翠綠霓虹點綴色 */
+                            textMuted: '#94A3B8'   /* 次要文字冷灰色 (Slate-400) */
                         }
                     }
                 }
             }
         }
     </script>
+
     <style>
+        /* 載入 Google Fonts 歐美英文字體與 Google 繁體中文(諾托)字體 */
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;700&display=swap');
-        body { background-color: #0F172A; -webkit-font-smoothing: antialiased; overflow: hidden; }
+
+        /* 全域基礎樣式調整：啟用高精度字體渲染、隱藏開場滾動條 */
+        body {
+            background-color: #0F172A;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; /* 防止開場放大動畫時衝出瀏覽器邊界產生滾動條 */
+        }
 
         /* ========================================================
-           ※ 魔法陣開場動畫樣式
+           ※ LOGO 級魔法陣開場動畫樣式
         ======================================================== */
+        /* 開場動畫全螢幕遮罩容器 */
         .magic-container {
             position: fixed;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 50;
-            pointer-events: none;
+            z-index: 50;              /* 確保疊在名片卡片的最上層 */
+            pointer-events: none;     /* 防止點擊穿透影響動畫 */
             transition: all 1s ease-in-out;
+            background-color: rgba(15, 23, 42, 0.9); /* 開場時背景稍微調暗，增加召喚儀式感 */
+            animation: fadeBg 2.8s forwards;         /* 控制全螢幕背景淡出的核心動畫 */
         }
 
-        /* 魔法陣主體：縮放與旋轉開場 */
-        .matrix-seal {
-            width: 300px;
-            height: 300px;
+        /* 魔法陣 SVG 本體樣式：定義初始縮放狀態與強大的霓虹雙色發光濾鏡 */
+        .matrix-logo-seal {
+            width: 380px;
+            height: 380px;
             opacity: 0;
-            transform: scale(0.3) rotate(-180deg);
-            animation: summonSeal 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            filter: drop-shadow(0 0 20px rgba(0, 230, 118, 0.6)) drop-shadow(0 0 40px rgba(14, 165, 233, 0.4));
+            transform: scale(0.4); /* 優化：移除初始的 rotate 衝突，改由內部圖層各自旋轉 */
+            animation: summonLogo 2.8s cubic-bezier(0.25, 1, 0.3, 1) forwards; /* 召喚開場主動畫軸 */
+            /* 完美重現 LOGO 的翡翠綠與乙太藍霓虹光暈 (混合發光濾鏡) */
+            filter: drop-shadow(0 0 25px rgba(0, 230, 118, 0.65)) drop-shadow(0 0 50px rgba(14, 165, 233, 0.35));
         }
 
-        /* 內圈逆旋轉，外圈正旋轉營造層次感 */
-        .seal-inner {
-            transform-origin: center;
-            animation: rotateClockwise 10s linear infinite;
+        /* 旋轉控制區：調整為同速（20s）反向咬合，重現 LOGO 複雜機械感並兼顧視覺和諧 */
+        .logo-rotate-clockwise {
+            transform-origin: center;                 /* 確保以 SVG 正中心點進行旋轉 */
+            animation: rotateCW 20s linear infinite;  /* 外圈幾何與虛線：順時針穩定旋轉 */
         }
-        .seal-outer {
+        .logo-rotate-counter {
+            transform-origin: center;                 /* 確保以 SVG 正中心點進行旋轉 */
+            animation: rotateCCW 20s linear infinite; /* 內圈幾何與實線：同速逆時針旋轉 */
+        }
+        /* 核心發光點的微幅呼吸跳動 */
+        .logo-core-pulse {
             transform-origin: center;
-            animation: rotateCounterClockwise 15s linear infinite;
+            animation: corePulse 2s ease-in-out infinite alternate;
         }
 
         /* ========================================================
            ※ 名片淡入樣式
         ======================================================== */
+        /* 控制主卡片在魔法陣展開到頂峰時（約2.4秒後）從下方優雅升起淡入 */
         .card-wrapper {
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInCard 1.2s cubic-bezier(0.25, 1, 0.5, 1) 2.2s forwards;
-        }
-
-        /* 經典動畫 Keyframes */
-        @keyframes summonSeal {
-            0% { opacity: 0; transform: scale(0.2) rotate(-220deg); }
-            15% { opacity: 1; transform: scale(1.1) rotate(0deg); }
-            25% { transform: scale(1) rotate(0deg); }
-            75% { opacity: 1; transform: scale(1) rotate(20deg); filter: drop-shadow(0 0 30px rgba(0, 230, 118, 0.8)); }
-            100% { opacity: 0; transform: scale(1.5) rotate(40deg); }
-        }
-
-        @keyframes rotateClockwise {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes rotateCounterClockwise {
-            to { transform: rotate(-360deg); }
-        }
-
-        @keyframes fadeInCard {
-            to { opacity: 1; transform: translateY(0); }
+            transform: translateY(30px);
+            animation: fadeInCard 1s cubic-bezier(0.25, 1, 0.5, 1) 2.4s forwards;
         }
 
         /* ========================================================
-           ※ 舊有名片原創按鈕樣式
+           ※ 動態 Keyframes 軸 (核心動畫細節控制)
+        ======================================================== */
+        /* 修正版：移除全局 rotate 屬性，完全消除內圈開場卡頓的反向剪切力，只專注於絲滑的縮放與爆發 */
+        @keyframes summonLogo {
+            0% { opacity: 0; transform: scale(0.3); filter: saturate(0.5) drop-shadow(0 0 0px transparent); }
+            15% { opacity: 1; transform: scale(1.05); } /* 快速彈性放大，超越原本大小 */
+            22% { transform: scale(1); }                /* 回歸正常大小並短暫定格 */
+            75% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 35px rgba(0, 230, 118, 0.8)) drop-shadow(0 0 60px rgba(14, 165, 233, 0.5)); } /* 光芒蓄力到最亮 */
+            100% { opacity: 0; transform: scale(1.4); filter: drop-shadow(0 0 0px transparent); } /* 向外衝擊放大淡出 */
+        }
+
+        /* 遮罩背景色淡出 Keyframe */
+        @keyframes fadeBg {
+            0% { background-color: rgba(15, 23, 42, 0.95); }
+            75% { background-color: rgba(15, 23, 42, 0.8); }
+            100% { background-color: rgba(15, 23, 42, 0); } /* 完全透明，讓後方名片完美呈現 */
+        }
+
+        /* 基礎旋轉：順時針 360 度 */
+        @keyframes rotateCW { to { transform: rotate(360deg); } }
+        /* 基礎旋轉：逆時針 360 度 */
+        @keyframes rotateCCW { to { transform: rotate(-360deg); } }
+
+        /* 核心縮放呼吸與不透明度交替效果 */
+        @keyframes corePulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* 名片由下而上淡入動畫目標值 */
+        @keyframes fadeInCard { to { opacity: 1; transform: translateY(0); } }
+
+        /* ========================================================
+           ※ 名片按鈕基礎設定 (切換分頁按鈕)
         ======================================================== */
         .tab-btn {
             padding-top: 0.375rem;
@@ -101,46 +138,61 @@
             border-radius: 0.5rem;
             text-align: center;
             border: 1px solid transparent;
-            transition: all 150ms ease-in-out;
+            transition: all 150ms ease-in-out; /* 點擊與 Hover 狀態的柔和過渡 */
             cursor: pointer;
         }
-
+        /* 當分頁處於「啟用 (Active)」狀態時的專屬樣式（綠字深底與微框） */
         .tab-btn[data-active="true"] {
             color: #00E676;
             background-color: #0F172A;
             border-color: rgba(16, 185, 129, 0.25);
         }
-
-        .tab-btn[data-active="false"] {
-            color: #64748B;
-            background-color: transparent;
-        }
-
-        @media (hover: hover) {
-            .tab-btn[data-active="false"]:hover {
-                color: #F8FAFC;
-            }
-        }
+        /* 當分頁處於「未啟用 (Inactive)」狀態時的灰色樣式 */
+        .tab-btn[data-active="false"] { color: #64748B; background-color: transparent; }
+        /* 電腦端滑鼠懸停 (Hover) 時的加亮提示效果（排除手機端滑動誤觸） */
+        @media (hover: hover) { .tab-btn[data-active="false"]:hover { color: #F8FAFC; } }
     </style>
 </head>
 <body class="font-sans min-h-screen flex items-center justify-center p-4 sm:p-6">
 
 <div class="magic-container" id="magic-overlay">
-    <svg class="matrix-seal" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle class="seal-outer" cx="100" cy="100" r="90" stroke="#00E676" stroke-width="1.5" stroke-dasharray="8 4 2 4 15 5" />
-        <circle class="seal-outer" cx="100" cy="100" r="82" stroke="#0ea5e9" stroke-width="0.5" stroke-dasharray="4 4" />
+    <svg class="matrix-logo-seal" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-        <g class="seal-inner">
-            <polygon points="100,25 165,137 35,137" stroke="#00E676" stroke-width="1" stroke-linejoin="round"/>
-            <polygon points="100,175 35,63 165,63" stroke="#0ea5e9" stroke-width="1" stroke-linejoin="round"/>
-            <circle cx="100" cy="100" r="45" stroke="#00E676" stroke-width="1" stroke-dasharray="40 10"/>
-            <circle cx="100" cy="100" r="8" fill="#00E676" />
+        <circle class="logo-rotate-clockwise" cx="200" cy="200" r="180" stroke="#0ea5e9" stroke-width="1" stroke-dasharray="2 6 40 6 2 12" opacity="0.6"/>
+        <circle class="logo-rotate-counter" cx="200" cy="200" r="172" stroke="#00E676" stroke-width="1.5" stroke-dasharray="15 8 2 8" />
+        <circle cx="200" cy="200" r="164" stroke="#0ea5e9" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.5"/>
+
+        <g opacity="0.9">
+            <line x1="200" y1="0" x2="200" y2="36" stroke="#00E676" stroke-width="1.5"/>
+            <polygon points="200,12 205,24 200,36 195,24" fill="#00E676"/>
+            <line x1="200" y1="364" x2="200" y2="400" stroke="#00E676" stroke-width="1.5"/>
+            <polygon points="200,364 205,376 200,388 195,376" fill="#00E676"/>
+            <line x1="0" y1="200" x2="36" y2="200" stroke="#0ea5e9" stroke-width="1.5"/>
+            <polygon points="12,200 24,205 36,200 24,195" fill="#0ea5e9"/>
+            <line x1="364" y1="200" x2="400" y2="200" stroke="#0ea5e9" stroke-width="1.5"/>
+            <polygon points="364,200 376,205 388,200 376,195" fill="#0ea5e9"/>
         </g>
 
-        <circle cx="100" cy="15" r="3" fill="#0ea5e9" />
-        <circle cx="100" cy="185" r="3" fill="#0ea5e9" />
-        <circle cx="15" cy="100" r="3" fill="#0ea5e9" />
-        <circle cx="185" cy="100" r="3" fill="#0ea5e9" />
+        <g class="logo-rotate-clockwise">
+            <polygon points="200,65 316,265 84,265" stroke="#00E676" stroke-width="2" stroke-linejoin="round"/>
+            <polygon points="200,335 84,135 316,135" stroke="#0ea5e9" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="200" cy="200" r="110" stroke="#00E676" stroke-width="1" stroke-dasharray="6 30 12 10" opacity="0.8"/>
+        </g>
+
+        <g class="logo-rotate-counter">
+            <polygon points="200,110 278,245 122,245" stroke="#0ea5e9" stroke-width="1" opacity="0.7"/>
+            <polygon points="200,290 122,155 278,155" stroke="#00E676" stroke-width="1" opacity="0.7"/>
+            <circle cx="200" cy="200" r="65" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="40 8 10 8"/>
+        </g>
+
+        <g class="logo-core-pulse">
+            <circle cx="200" cy="200" r="22" stroke="#00E676" stroke-width="2" />
+            <circle cx="200" cy="200" r="12" fill="#00E676" />
+            <circle cx="200" cy="145" r="4" fill="#0ea5e9"/>
+            <circle cx="200" cy="255" r="4" fill="#0ea5e9"/>
+            <circle cx="145" cy="200" r="4" fill="#00E676"/>
+            <circle cx="255" cy="200" r="4" fill="#00E676"/>
+        </g>
     </svg>
 </div>
 
@@ -215,29 +267,43 @@
             </div>
         </div>
 
-<!--        <p class="text-center text-[10px] text-slate-500 font-mono mt-5">-->
-<!--            // Optimized for RWD & Accessibility-->
-<!--        </p>-->
-
+        <p class="text-center text-[10px] text-slate-500 font-mono mt-5">
+            // Optimized for RWD & Accessibility
+        </p>
     </div>
 </div>
 
 <script>
-    // 1. 分頁切換邏輯
+    /**
+     * 負責卡片職能分頁（SWE / GAME / PHOTO）的動態切換
+     * @param {string} role - 分頁識別碼 ('swe', 'game', 'photo')
+     */
     function switchTab(role) {
+        // 1. 將所有分頁內容隱藏（加入 'hidden' 樣式類別）
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+        // 2. 解除目前指定分頁的隱藏狀態，將其呈現
         document.getElementById('content-' + role).classList.remove('hidden');
+
+        // 3. 將所有頁籤按鈕的啟用狀態設為不活躍的 false
         document.querySelectorAll('.tab-btn').forEach(el => el.setAttribute('data-active', 'false'));
+
+        // 4. 將當前點擊的按鈕之 CSS 自訂屬性設為活躍的 true，藉此觸發對應的高亮樣式
         document.getElementById('tab-' + role).setAttribute('data-active', 'true');
     }
 
-    // 2. 開場動畫結束後，允許網頁捲動（防呆）
+    /**
+     * 動態解鎖與安全移除遮罩
+     * 配合 CSS @keyframes summonLogo 的 2.8秒 總長度，在 2.9秒 時徹底自 DOM 中銷毀遮罩，以釋放系統記憶體
+     */
     setTimeout(() => {
+        // 1. 動態還原網頁滾動條功能，使用戶可以自由瀏覽名片網頁
         document.body.style.overflow = 'auto';
-        // 移除魔法陣的 DOM 節點，優化效能並避免擋到網頁點擊
+
+        // 2. 獲取並移除開場動畫遮罩本體，避免不可見元素擋在最上層影響使用者操作
         const overlay = document.getElementById('magic-overlay');
         if (overlay) overlay.remove();
-    }, 2600);
+    }, 2900); // 2900毫秒 (即 2.9 秒) 完美的無縫銜接點
 </script>
 
 </body>
